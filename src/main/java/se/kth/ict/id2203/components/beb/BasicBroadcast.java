@@ -21,15 +21,48 @@ package se.kth.ict.id2203.components.beb;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import se.kth.ict.id2203.ports.beb.BebBroadcast;
+import se.kth.ict.id2203.ports.beb.BestEffortBroadcast;
+import se.kth.ict.id2203.ports.pp2p.PerfectPointToPointLink;
+import se.kth.ict.id2203.ports.pp2p.Pp2pSend;
 import se.sics.kompics.ComponentDefinition;
+import se.sics.kompics.Handler;
+import se.sics.kompics.Negative;
+import se.sics.kompics.Positive;
+import se.sics.kompics.address.Address;
+
+import java.util.HashSet;
 
 public class BasicBroadcast extends ComponentDefinition {
 
 	private static final Logger logger = LoggerFactory.getLogger(BasicBroadcast.class);
 
+	private final HashSet<Address> allAddress;
+
+	private final Positive<PerfectPointToPointLink> perfectPointToPointLink = requires(PerfectPointToPointLink.class);
+	private final Negative<BestEffortBroadcast> bestEffortBroadcast = provides(BestEffortBroadcast.class);
+
+	private final Handler<BebBroadcast> bebBroadcastHandler = new Handler<BebBroadcast>() {
+		@Override
+		public void handle(BebBroadcast event) {
+			for (Address address : allAddress) {
+				trigger(new Pp2pSend(address, new BebDataMessage(address, event.getDeliverEvent())), perfectPointToPointLink);
+			}
+		}
+	};
+
+	private final Handler<BebDataMessage> bebMessageHandler = new Handler<BebDataMessage>() {
+		@Override
+		public void handle(BebDataMessage event) {
+			trigger(event.getDeliverEvent(), bestEffortBroadcast);
+		}
+	};
+
 	public BasicBroadcast(BasicBroadcastInit init) {
-		
+		allAddress = new HashSet<>(init.getAllAddresses());
+
+		subscribe(bebBroadcastHandler, bestEffortBroadcast);
+		subscribe(bebMessageHandler, perfectPointToPointLink);
 	}
 
 }

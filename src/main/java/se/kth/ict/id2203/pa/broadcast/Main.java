@@ -75,8 +75,8 @@ public class Main extends ComponentDefinition {
 		Component console = create(JavaConsole.class, Init.NONE);
 		Component pp2p = create(DelayLink.class, new DelayLinkInit(topology, 1000));
 		Component beb = create(BasicBroadcast.class, new BasicBroadcastInit(self, pi));
-		Component rb = create(EagerRb.class, new EagerRbInit(self, pi));
-		Component crb = create(WaitingCrb.class, new WaitingCrbInit(self, pi));
+//		Component rb = create(EagerRb.class, new EagerRbInit(self, pi));
+//		Component crb = create(WaitingCrb.class, new WaitingCrbInit(self, pi));
 		Component app = create(Application.class, new ApplicationInit(self, pi, commandScript));
 
 		subscribe(handleFault, timer.control());
@@ -84,20 +84,20 @@ public class Main extends ComponentDefinition {
 		subscribe(handleFault, console.control());
 		subscribe(handleFault, pp2p.control());
 		subscribe(handleFault, beb.control());
-		subscribe(handleFault, rb.control());
-		subscribe(handleFault, crb.control());
+//		subscribe(handleFault, rb.control());
+//		subscribe(handleFault, crb.control());
 		subscribe(handleFault, app.control());
 
-		connect(app.required(CausalOrderReliableBroadcast.class), crb.provided(CausalOrderReliableBroadcast.class));
-		connect(app.required(ReliableBroadcast.class), rb.provided(ReliableBroadcast.class));
+//		connect(app.required(CausalOrderReliableBroadcast.class), crb.provided(CausalOrderReliableBroadcast.class));
+//		connect(app.required(ReliableBroadcast.class), rb.provided(ReliableBroadcast.class));
 		connect(app.required(BestEffortBroadcast.class), beb.provided(BestEffortBroadcast.class));
 		connect(app.required(PerfectPointToPointLink.class), pp2p.provided(PerfectPointToPointLink.class));
 		connect(app.required(Console.class), console.provided(Console.class));
 		connect(app.required(Timer.class), timer.provided(Timer.class));
 
-		connect(crb.required(ReliableBroadcast.class), rb.provided(ReliableBroadcast.class));
-
-		connect(rb.required(BestEffortBroadcast.class), beb.provided(BestEffortBroadcast.class));
+//		connect(crb.required(ReliableBroadcast.class), rb.provided(ReliableBroadcast.class));
+//
+//		connect(rb.required(BestEffortBroadcast.class), beb.provided(BestEffortBroadcast.class));
 		
 		connect(beb.required(PerfectPointToPointLink.class), pp2p.provided(PerfectPointToPointLink.class));
 
